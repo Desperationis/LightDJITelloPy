@@ -15,7 +15,7 @@ Feel free to contribute!
 
 ## Usage
 ### API Reference
-See `documentation.pdf` for my custom documentation as the original one was simply "look at the source code". 
+See ![documentation.pdf](documentation.pdf) for my custom documentation as the original one was simply "look at the source code". 
 
 ### Simple example
 ```Python
