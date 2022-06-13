@@ -1,2 +1,2 @@
-from .tello import Tello, TelloException, BackgroundFrameRead
+from .tello import Tello, TelloException
 from .swarm import TelloSwarm
