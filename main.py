@@ -1,9 +1,11 @@
 from lightdjitellopy import Tello
 
 tello = Tello()
-tello.connect()
+tello.connect(True)
 tello.takeoff()
 
-## DO stuff
+# Your code here
 
-tello.land()
+
+tello.closeSocket()
+tello.end()

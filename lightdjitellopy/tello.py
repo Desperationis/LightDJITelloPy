@@ -13,6 +13,7 @@ from .enforce_types import enforce_types
 threads_initialized = False
 drones: Optional[dict] = {}
 client_socket: socket.socket
+state_socket: socket.socket
 
 
 class TelloException(Exception):
@@ -93,7 +94,7 @@ class Tello:
                  host=TELLO_IP,
                  retry_count=RETRY_COUNT):
 
-        global threads_initialized, client_socket, drones
+        global threads_initialized, client_socket, drones, state_socket
 
         self.address = (host, Tello.CONTROL_UDP_PORT)
         self.stream_on = False
@@ -104,16 +105,20 @@ class Tello:
         if not threads_initialized:
             # Run Tello command responses UDP receiver on background
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            client_socket.bind(("", Tello.CONTROL_UDP_PORT))
             response_receiver_thread = Thread(target=Tello.udp_response_receiver)
             response_receiver_thread.daemon = True
             response_receiver_thread.start()
 
             # Run state UDP receiver on background
+            state_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            state_socket.bind(("", Tello.STATE_UDP_PORT))
             state_receiver_thread = Thread(target=Tello.udp_state_receiver)
             state_receiver_thread.daemon = True
             state_receiver_thread.start()
 
             threads_initialized = True
+
 
         drones[host] = {'responses': [], 'state': {}}
 
@@ -142,8 +147,9 @@ class Tello:
                 address = address[0]
                 Tello.LOGGER.debug('Data received from {} at client_socket'.format(address))
 
+                print("Address: " + address)
                 if address not in drones:
-                    continue
+                    drones[address] = {'responses' : [], 'state' : {}}
 
                 drones[address]['responses'].append(data)
 
@@ -158,8 +164,6 @@ class Tello:
         the main thread.
         Internal method, you normally wouldn't call this yourself.
         """
-        state_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        state_socket.bind(("", Tello.STATE_UDP_PORT))
 
         while True:
             try:
@@ -986,6 +990,10 @@ class Tello:
         host = self.address[0]
         if host in drones:
             del drones[host]
+
+    def closeSocket(self):
+        client_socket.close()
+        state_socket.close()
 
     def __del__(self):
         self.end()
