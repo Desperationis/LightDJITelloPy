@@ -1,6 +1,11 @@
 from lightdjitellopy import Tello
 
-tello = Tello(host="192.168.47.1")
+"""
+    Basic template to control the Tello. Simply connect to the Tello's wifi
+    (TELLO-XXXX) and run.
+"""
+
+tello = Tello()
 tello.connect()
 tello.takeoff()
 
