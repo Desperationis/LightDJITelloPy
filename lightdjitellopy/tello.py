@@ -30,33 +30,13 @@ class Tello:
     # Send and receive commands, client socket
     RESPONSE_TIMEOUT = 7  # in seconds
     TAKEOFF_TIMEOUT = 20  # in seconds
-    FRAME_GRAB_TIMEOUT = 5
     TIME_BTW_COMMANDS = 0.1  # in seconds
     TIME_BTW_RC_CONTROL_COMMANDS = 0.001  # in seconds
     RETRY_COUNT = 3  # number of retries after a failed command
     TELLO_IP = '192.168.10.1'  # Tello IP address
 
-    # Video stream, server socket
-    VS_UDP_IP = '0.0.0.0'
-    VS_UDP_PORT = 11111
-
     CONTROL_UDP_PORT = 8889
     STATE_UDP_PORT = 8890
-
-    # Constants for video settings
-    BITRATE_AUTO = 0
-    BITRATE_1MBPS = 1
-    BITRATE_2MBPS = 2
-    BITRATE_3MBPS = 3
-    BITRATE_4MBPS = 4
-    BITRATE_5MBPS = 5
-    RESOLUTION_480P = 'low'
-    RESOLUTION_720P = 'high'
-    FPS_5 = 'low'
-    FPS_15 = 'middle'
-    FPS_30 = 'high'
-    CAMERA_FORWARD = 0
-    CAMERA_DOWNWARD = 1
 
     # Set up logger
     HANDLER = logging.StreamHandler()
@@ -87,7 +67,6 @@ class Tello:
     state_field_converters.update({key : float for key in FLOAT_STATE_FIELDS})
 
 
-    stream_on = False
     is_flying = False
 
     def __init__(self,
@@ -97,7 +76,6 @@ class Tello:
         global threads_initialized, client_socket, drones, state_socket
 
         self.address = (host, Tello.CONTROL_UDP_PORT)
-        self.stream_on = False
         self.retry_count = retry_count
         self.last_received_command_timestamp = time.time()
         self.last_rc_control_timestamp = time.time()
@@ -389,13 +367,6 @@ class Tello:
         """
         return self.get_state_field('bat')
 
-    def get_udp_video_address(self) -> str:
-        """Internal method, you normally wouldn't call this youself.
-        """
-        address_schema = 'udp://{ip}:{port}'  # + '?overrun_nonfatal=1&fifo_size=5000'
-        address = address_schema.format(ip=self.VS_UDP_IP, port=self.VS_UDP_PORT)
-        return address
-
     def send_command_with_return(self, command: str, timeout: int = RESPONSE_TIMEOUT) -> str:
         """Send command to Tello and wait for its response.
         Internal method, you normally wouldn't call this yourself.
@@ -554,26 +525,6 @@ class Tello:
         """
         self.send_control_command("land")
         self.is_flying = False
-
-    def streamon(self):
-        """Turn on video streaming. Use `tello.get_frame_read` afterwards.
-        Video Streaming is supported on all tellos when in AP mode (i.e.
-        when your computer is connected to Tello-XXXXXX WiFi ntwork).
-        Currently Tello EDUs do not support video streaming while connected
-        to a WiFi-network.
-
-        !!! Note:
-            If the response is 'Unknown command' you have to update the Tello
-            firmware. This can be done using the official Tello app.
-        """
-        self.send_control_command("streamon")
-        self.stream_on = True
-
-    def streamoff(self):
-        """Turn off video streaming.
-        """
-        self.send_control_command("streamoff")
-        self.stream_on = False
 
     def emergency(self):
         """Stop all motors immediately.
@@ -831,49 +782,6 @@ class Tello:
         """
         self.send_command_without_return('reboot')
 
-    def set_video_bitrate(self, bitrate: int):
-        """Sets the bitrate of the video stream
-        Use one of the following for the bitrate argument:
-            Tello.BITRATE_AUTO
-            Tello.BITRATE_1MBPS
-            Tello.BITRATE_2MBPS
-            Tello.BITRATE_3MBPS
-            Tello.BITRATE_4MBPS
-            Tello.BITRATE_5MBPS
-        """
-        cmd = 'setbitrate {}'.format(bitrate)
-        self.send_control_command(cmd)
-
-    def set_video_resolution(self, resolution: str):
-        """Sets the resolution of the video stream
-        Use one of the following for the resolution argument:
-            Tello.RESOLUTION_480P
-            Tello.RESOLUTION_720P
-        """
-        cmd = 'setresolution {}'.format(resolution)
-        self.send_control_command(cmd)
-
-    def set_video_fps(self, fps: str):
-        """Sets the frames per second of the video stream
-        Use one of the following for the fps argument:
-            Tello.FPS_5
-            Tello.FPS_15
-            Tello.FPS_30
-        """
-        cmd = 'setfps {}'.format(fps)
-        self.send_control_command(cmd)
-
-    def set_video_direction(self, direction: int):
-        """Selects one of the two cameras for video streaming
-        The forward camera is the regular 1080x720 color camera
-        The downward camera is a grey-only 320x240 IR-sensitive camera
-        Use one of the following for the direction argument:
-            Tello.CAMERA_FORWARD
-            Tello.CAMERA_DOWNWARD
-        """
-        cmd = 'downvision {}'.format(direction)
-        self.send_control_command(cmd)
-
     def send_expansion_command(self, expansion_cmd: str):
         """Sends a command to the ESP32 expansion board connected to a Tello Talent
         Use e.g. tello.send_expansion_command("led 255 0 0") to turn the top led red.
@@ -982,8 +890,6 @@ class Tello:
         try:
             if self.is_flying:
                 self.land()
-            if self.stream_on:
-                self.streamoff()
         except TelloException:
             pass
 
