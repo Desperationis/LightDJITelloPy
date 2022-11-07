@@ -8,9 +8,6 @@
 """
 
 # Tell python interpreter to import library from parent folder. 
-import os
-import sys
-sys.path.append(os.path.join(os.getcwd(), ".."))
 from lightdjitellopy import Tello
 
 print("Move the drone by pressing W,A,S,D. Press T to takeoff and L to land.")
