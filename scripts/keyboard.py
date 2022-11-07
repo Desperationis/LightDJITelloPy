@@ -45,6 +45,10 @@ class BaseDrone:
     def land(self):
         self.tello.land()
 
+    def end(self):
+        self.tello.closeSocket()
+        self.tello.end()
+
 class SafeDrone(BaseDrone):
     def __init__(self, hozDist, verDist, turnDist):
         """
@@ -181,3 +185,6 @@ while True:
     if command.upper() == "L":
         drone.land()
 
+
+drone.land()
+drone.end()
