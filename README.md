@@ -32,6 +32,9 @@ tello.move_forward(100)
 tello.land()
 ```
 
+### How to install locally
+Run `pip install .` to install `lightdjitellopy` locally.
+
 ### Notes
 - Mission pad detection and navigation is only supported by the Tello EDU.
 - Bright environment is necessary for successful use of mission pads.
