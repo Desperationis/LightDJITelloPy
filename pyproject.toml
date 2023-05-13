@@ -1,4 +1,25 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lightdjitellopy"
+version = "1.0.3"
+authors = [
+  { name="Diego Contreras", email="smarttdiego@gmail.com" },
+]
+description = "Lightweight branch of DJITelloPy for use in lightweight devices"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Desperationis/LightDJITelloPy"
+"Bug Tracker" = "https://github.com/Desperationis/LightDJITelloPy/issues"
+
+
 
